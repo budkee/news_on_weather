@@ -17,7 +17,7 @@ def coleta(lat, lon, arquivo_saida, evento_conclusao_coleta):
     # Parâmetros para o consumo
     lang = "pt_br"
     metric = "metric"  
-    api_key = "eaf6771e887f40128a529e15f989718f"
+    api_key = "<sua_api_key>"
     url_acesso = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units={metric}&lang={lang}&appid={api_key}'
     
     # Limite: 60 requisições/minuto ou 1.000.000 de requisições/mês
@@ -98,9 +98,9 @@ def armazena_mysql(df, evento_conclusao_coleta):
     
     # Conexão
     conexao = mysql.connector.connect(
-        host="mysql",
-        user="siriusb",
-        password="sirius",
+        host="<seu_host>",
+        user="<seu_usuario>",
+        password="<sua_senha>",
         database="open_weather_map"
     )
     

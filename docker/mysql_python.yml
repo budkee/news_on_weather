@@ -1,4 +1,4 @@
-#version: "3.8"
+# version: "3.8"
 # Stack de serviços mysql + interface web
 services:
   mysql:
@@ -36,7 +36,7 @@ services:
       - ./coleta_armazenamento_ddd/requirements.txt:/app/requirements.txt
     environment:
       MYSQL_HOST: mysql
-      MYSQL_USER: siriusb
-      MYSQL_PASSWORD: sirius
+      MYSQL_USER: <seu_usuario>
+      MYSQL_PASSWORD: <sua_senha>
       MYSQL_DATABASE: open_weather_map
     
