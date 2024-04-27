@@ -8,33 +8,33 @@
             "id": 800,
             "main": "Clear",
             "description": "c\u00e9u limpo",
-            "icon": "01n"
+            "icon": "01d"
         }
     ],
     "base": "stations",
     "main": {
-        "temp": 25.52,
-        "feels_like": 25.82,
-        "temp_min": 25.52,
-        "temp_max": 25.52,
-        "pressure": 1014,
-        "humidity": 65
+        "temp": 28.52,
+        "feels_like": 29.99,
+        "temp_min": 28.52,
+        "temp_max": 28.52,
+        "pressure": 1015,
+        "humidity": 58
     },
     "visibility": 10000,
     "wind": {
-        "speed": 1.54,
-        "deg": 10
+        "speed": 4.63,
+        "deg": 30
     },
     "clouds": {
         "all": 0
     },
-    "dt": 1714089430,
+    "dt": 1714220535,
     "sys": {
         "type": 1,
         "id": 8347,
         "country": "BR",
-        "sunrise": 1714038760,
-        "sunset": 1714079956
+        "sunrise": 1714211603,
+        "sunset": 1714252678
     },
     "timezone": -14400,
     "id": 3467747,

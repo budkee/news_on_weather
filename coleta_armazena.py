@@ -1,3 +1,4 @@
+import os
 import time
 import json
 import argparse
@@ -10,8 +11,9 @@ import mysql.connector # type: ignore
 from mysql.connector import Error # type: ignore
 
 
-# 1. Consumir a API
 def coleta(lat, lon, arquivo_saida, evento_conclusao_coleta):
+    
+    # 1. Consumir a API
     # Parâmetros para o consumo
     lang = "pt_br"
     metric = "metric"  
@@ -20,40 +22,79 @@ def coleta(lat, lon, arquivo_saida, evento_conclusao_coleta):
     
     # Limite: 60 requisições/minuto ou 1.000.000 de requisições/mês
     # TODO: Aplicar um padrão de projeto que consiga realizar o máximo de requisições por dia.
+    
     response = requests.get(url_acesso)
     data = response.json()
     
-    # Verifique o código de status da resposta
+    # Selecionar os tipos de dados desejados
     if response.status_code == 200:
-        print('Deu bom!')
-        print('Você está trabalhando com: ', type(data))
-        df = pd.DataFrame(data)
-        print(df) 
+        print("1. Consumindo a API\n\n")
+        print('Deu bom!\nRecolhendo os dados...\n')
+
+        entidades = {
+            'timestamp': data['dt'],
+            'temperatura': data['main']['temp'],
+            'umidade': data['main']['humidity'],
+            'pressao': data['main']['pressure'],
+            'direcao_vento': data['wind']['deg'],
+            'velocidade_vento': data['wind']['speed']
+        }
+        
+        # Visualizar os dados recolhidos
+        df = pd.DataFrame(entidades, index=[0])
+        print(df)
+        print("\nTudo certo!")
+        
+        
+        # Chamando a função de callback para armazenar os dados
+        coleta_concluida(df, evento_conclusao_coleta)
     
     else:
         print('Erro:', response.status_code)
         print(response.text) 
         
-    #print("!\nSalvando o arquivo e armazenando no MySQL...\n")
+    # 2. Parâmetros para o armazenamento local
+    # print("\nIniciando o armazenamento...")
+    # print("Criando os repositórios...")
+    # if not os.path.exists('dados_brutos'):
+    #     os.makedirs('dados_brutos')
+    # 
+    # caminho_json = os.path.join('dados_brutos', 'json')
+    # caminho_csv = os.path.join('dados_brutos', 'csv')
+    # 
+    # 
+    # if not os.path.exists(caminho_json):
+    #     os.makedirs(caminho_json)
+    # if not os.path.exists(caminho_csv):
+    #     os.makedirs(caminho_csv)
+    # 
+    # # Armazenar localmente os dados em formato JSON e CSV
+    # # Salvar em JSON
+    # arquivo_json = os.path.join(caminho_json, 'response.json')
+    # print("\nSalvando o arquivo JSON em", arquivo_json)
+    # with open(arquivo_json, 'w') as arquivo_saida:
+    #     json.dump(data, arquivo_saida, indent=4)
+# 
+    # # Salvar em CSV
+    # arquivo_csv = os.path.join(caminho_csv, 'entidades.csv')
+    # print("\nSalvando o arquivo CSV em", arquivo_csv)
+    # df.to_csv(arquivo_csv, index=False)
     
-    # 2. Armazenar em um arquivo .json
-    with open(arquivo_saida, 'w') as aS:
-        json.dump(data, aS, indent=4)
-    
-    # Sinalizar que a coleta foi concluída
+    # Sinalizar a thread principal que a coleta foi concluída
     evento_conclusao_coleta.set()
     
-# 3. Conectar e exportar os dados para o MySQL
-def armazena_mysql(arquivo_saida, evento_conclusao_coleta):
+    # Retornar o DataFrame criado
+    return df
+    
+def armazena_mysql(df, evento_conclusao_coleta):
     # Espera até que o evento de conclusão da coleta seja acionado
     evento_conclusao_coleta.wait()
     
-    # Delay pra conexão (15 segundos)
-    #time.sleep(15)
+    # 3. Conectar e exportar os dados para o MySQL
+    print("\n\n2. Iniciando o armazenamento remoto (MySQL)...")
     
-    # Ler o arquivo JSON
-    with open(arquivo_saida, 'r') as dc:
-        data = json.load(dc)
+    # Delay pra conexão (15 segundos)
+    time.sleep(10)
     
     # Conexão
     conexao = mysql.connector.connect(
@@ -66,7 +107,7 @@ def armazena_mysql(arquivo_saida, evento_conclusao_coleta):
     
     # Descrição da conexão
     db_info = conexao.get_server_info()
-    print("\n\nConectado com sucesso ao servidor MySQL versão", db_info)
+    print("\nConectado com sucesso ao servidor MySQL versão", db_info)
     # Cria o cursor e verifica a conexão
     cursor = conexao.cursor()
     cursor.execute("select database();")
@@ -76,75 +117,101 @@ def armazena_mysql(arquivo_saida, evento_conclusao_coleta):
     # DDL: Criar uma tabela para o tipo de coleta        
     criar_tabela = """
     CREATE TABLE IF NOT EXISTS current_weather (
-        timestamp TIMESTAMP PRIMARY KEY,
+        timestamp INT PRIMARY KEY,
         temperatura FLOAT,
         umidade INT,
-        pressao_atmosferica INT,
-        direcao_vento FLOAT,
+        pressao INT,
+        direcao_vento INT,
         velocidade_vento FLOAT
     );"""
     cursor.execute(criar_tabela)
-    print("Tabela 'current_weather' criada com sucesso!")
-    #print(cursor.fetchone())
+    print("\nTabela 'current_weather' criada com sucesso!")
+    
+    # TODO: (i) Criar uma tabela para cada tipo de coleta (?)
+    # criar_tabela = """
+    # CREATE TABLE IF NOT EXISTS tipo_coleta (
+    #     timestamp INT PRIMARY KEY,
+    #     temperatura FLOAT,
+    #     umidade INT,
+    #     pressao INT,
+    #     direcao_vento INT,
+    #     velocidade_vento FLOAT
+    # );"""
+    # cursor.execute(criar_tabela)
+    # print("\nTabela 'tipo_coleta' criada com sucesso!")
+    
+    
+    # TODO: (ii) Verificar se os dados já existem.
     
     # DML: Inserir os dados 
-    #query = "INSERT INTO current_weather (timestamp, temperatura, umidade, pressao_atmosferica, direcao_vento, velocidade_vento) VALUES (%d, %f, %d, %d, %d, %f)"
-#    valores = (
-#        data['dt'], 
-#        data['main']['temp'], 
-#        data['main']['humidity'], 
-#        data['main']['pressure'], 
-#        data['wind']['deg'], 
-#        data['wind']['speed']
-#    )
+    for _, row in df.iterrows():
+        query = "INSERT INTO current_weather (timestamp, temperatura, umidade, pressao, direcao_vento, velocidade_vento) VALUES (%s, %s, %s, %s, %s, %s)"
+        valores = (
+            int(row['timestamp']), 
+            float(row['temperatura']), 
+            int(row['umidade']), 
+            int(row['pressao']), 
+            int(row['direcao_vento']), 
+            float(row['velocidade_vento'])
+        )
+    cursor.execute(query, valores)
     
-    #print(query)
-    #print(valores)
-    #cursor.execute(query, valores)
+    # TODO: (iii) Atualizar os dados existentes.
+    # DML: Atualizar os dados
+    # query = "UPDATE current_weather SET temperatura = %s, umidade = %s, pressao = %s, direcao_vento = %s, velocidade_vento = %s WHERE timestamp = %s"
+    # valores = (
+        # float(row['temperatura']),
+        # int(row['umidade']),
+        # int(row['pressao']),
+        # int(row['direcao_vento']),
+        # float(row['velocidade_vento']),
+        # int(row['timestamp'])
+    # )
+    # cursor.execute(query, valores)
     
-    
-
+    print("Salvando as alterações")
     # Commit para salvar as alterações
     conexao.commit()
-    #print(cursor.rowcount, "registros inseridos na tabela.")
+    print(cursor.rowcount, "registros inseridos na tabela.")
         
-        
+    print("Fim do serviço")
     if (conexao.is_connected()):
         # Fechar cursor e conexão
         cursor.close()
         conexao.close()
         print("Conexão finalizada.")
 
-
+# Função de callback para ser chamada quando a coleta estiver concluída
+def coleta_concluida(df, evento_conclusao_coleta):
+    # Armazena os dados no MySQL
+    armazenamento_thread = threading.Thread(target=armazena_mysql, args=(df, evento_conclusao_coleta))
+    armazenamento_thread.start()
+    
+    
 # Módulo principal do programa
 def main():
     
-    # Recebe os argumentos da CLI
+    # 0. Recolhe os parâmetros e verifica se foram passados os argumentos
+    # Objeto para receber os argumentos da CLI
     parser = argparse.ArgumentParser(description="Coleta e armazena dados de uma estação meteorológica com base em coordenadas geográficas.")
     
+    # Análise de argumentos
     ## Entrada
-    parser.add_argument("--coord", nargs=2, metavar=('lat', 'long'), type=float, help="Latitude e longitude da estação meteorológica de interesse.")
+    parser.add_argument("--coord", nargs=2, metavar=('lat', 'long'), help="Latitude e longitude da estação meteorológica de interesse.")
     
     ## Nome do arquivo de saída
-    parser.add_argument("--out", metavar='arquivo_saida', help="Arquivo de saída em JSON")
+    parser.add_argument("--out", metavar='arquivo_saida', help="Nome do arquivo de saída")
     
-    # Recolhe os parâmetros e verifica se foram passados os argumentos
     args = parser.parse_args()
     if args.coord and args.out:
         
         # Evento para sinalizar a conclusão da coleta
         evento_conclusao_coleta = threading.Event()
         
-        # Thread 1: Coleta de dados
-        # coleta(args.coord[0], args.coord[1], args.out)
-        # Iniciar a coleta e o armazenamento em threads separadas
+        # Coleta de dados
         coleta_thread = threading.Thread(target=coleta, args=(args.coord[0], args.coord[1], args.out, evento_conclusao_coleta))
-        coleta_thread.start()
         
-        # Thread 2: Armazena no MySQL
-        # armazena_mysql(args.out)
-        #armazenamento_thread = threading.Thread(target=armazena_mysql, args=(args.out,evento_conclusao_coleta))
-        #armazenamento_thread.start()
+        coleta_thread.start()        
     else:
         print("Por favor, forneça as coordenadas de entrada e o nome do arquivo de saída.")
 
