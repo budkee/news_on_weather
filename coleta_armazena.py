@@ -28,7 +28,7 @@ def coleta(lat, lon, arquivo_saida, evento_conclusao_coleta):
     
     # Selecionar os tipos de dados desejados
     if response.status_code == 200:
-        print("1. Consumindo a API\n\n")
+        print("|-----------1. Consumindo a API--------------|\n")
         print('Deu bom!\nRecolhendo os dados...\n')
 
         entidades = {
@@ -91,7 +91,7 @@ def armazena_mysql(df, evento_conclusao_coleta):
     evento_conclusao_coleta.wait()
     
     # 3. Conectar e exportar os dados para o MySQL
-    print("\n\n2. Iniciando o armazenamento remoto (MySQL)...")
+    print("\n\n|-----------2. Iniciando o armazenamento remoto (MySQL)--------------|")
     
     # Delay pra conexão (15 segundos)
     time.sleep(10)
@@ -114,6 +114,7 @@ def armazena_mysql(df, evento_conclusao_coleta):
     bd = cursor.fetchone()
     print("Conectado ao banco de dados ", bd)
     
+    print("\nCriando a tabela 'current_weather'\n")
     # DDL: Criar uma tabela para o tipo de coleta        
     criar_tabela = """
     CREATE TABLE IF NOT EXISTS current_weather (
@@ -125,7 +126,7 @@ def armazena_mysql(df, evento_conclusao_coleta):
         velocidade_vento FLOAT
     );"""
     cursor.execute(criar_tabela)
-    print("\nTabela 'current_weather' criada com sucesso!")
+    print("Tabela 'current_weather...' criada com sucesso!")
     
     # TODO: (i) Criar uma tabela para cada tipo de coleta (?)
     # criar_tabela = """
@@ -143,6 +144,7 @@ def armazena_mysql(df, evento_conclusao_coleta):
     
     # TODO: (ii) Verificar se os dados já existem.
     
+    print("\nInserindo os dados...")
     # DML: Inserir os dados 
     for _, row in df.iterrows():
         query = "INSERT INTO current_weather (timestamp, temperatura, umidade, pressao, direcao_vento, velocidade_vento) VALUES (%s, %s, %s, %s, %s, %s)"
@@ -169,17 +171,17 @@ def armazena_mysql(df, evento_conclusao_coleta):
     # )
     # cursor.execute(query, valores)
     
-    print("Salvando as alterações")
+    print("Commitando as alterações...\n")
     # Commit para salvar as alterações
     conexao.commit()
-    print(cursor.rowcount, "registros inseridos na tabela.")
+    print(cursor.rowcount, "registros inseridos na tabela.\n")
         
-    print("Fim do serviço")
+    print("|-----------Fim do serviço--------------|")
     if (conexao.is_connected()):
         # Fechar cursor e conexão
         cursor.close()
         conexao.close()
-        print("Conexão finalizada.")
+        print("|-----------Conexão finalizada--------------|")
 
 # Função de callback para ser chamada quando a coleta estiver concluída
 def coleta_concluida(df, evento_conclusao_coleta):
