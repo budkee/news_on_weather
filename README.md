@@ -75,6 +75,7 @@ Criação de um script que realize a coleta e o armazenamento dos dados em um ba
 
 ## Links e Referências
 
+- [Link desse repositório | GitHub](https://github.com/budkee/coleta_armazenamento_ddd)
 - [OpenWeatherMap | Docs](https://openweathermap.org/current)
 - [Como conectar um script em Python a um banco de dados MySQL](https://youtu.be/FXlixv8Ieoc?si=5U9EPcKSe2ws1xOE)
 - [Criar tabela em um banco MySQL com script em Python](https://youtu.be/yMqBfSl53MA?si=g9KJWvnqnD11OQAz)
