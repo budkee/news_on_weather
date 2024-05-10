@@ -1,14 +1,11 @@
 # Desenvolvimento inicial do sistema de coleta de dados climáticos
 
-Criação de um script que realize a coleta e o armazenamento dos dados em um banco de dados relacional a partir da seguinte documentação:
-
-- [Projeto de software](https://budkee.notion.site/Open-Weather-Map-3b2e4e5a58ec4898ad31f94c178ca2db?pvs=4)
-
+Criação de um script que realize a coleta e o armazenamento dos dados de interesse (ETL) a um banco de dados relacional (MySQL) a partir da [análise de modelagem do domínio do sistema](https://budkee.notion.site/Open-Weather-Map-3b2e4e5a58ec4898ad31f94c178ca2db?pvs=4).
 
 ## Anotações
 
 - Criar um repositório do projeto e outro para o script, de modo que a execução dos containers seja feita estando no repo do projeto.
-- A API da OpenWeatherMap fornece 2 opções para o envio do pacote: `json` e `xml`, aqui foi escolhido o `json` também utilizando `csv` para manipulação dos dados com pandas.
+- A API da OpenWeatherMap fornece 2 opções para o envio do pacote: `json` e `xml`, aqui foi escolhido o `json` para o consumo e posteriormente manipulado com `csv` em pandas.
 - **Tem o limite de 60 requisições/dia ou 1.000.000 de requisições/mês, possibilitando implementar um método/padrão de projeto que consiga recolher o máximo de requisições/dia ou mês**.
 - Os componentes atuantes nesse sistema são: um servidor linux e Python, um servidor de banco de dados MySQL e uma interface web usando PhpMyAdmin.
 - O sistema será executado através de um compose onde cada container docker equivale a um componente do sistema.
@@ -75,12 +72,26 @@ Criação de um script que realize a coleta e o armazenamento dos dados em um ba
 
 ## Links e Referências
 
-- [Link desse repositório | GitHub](https://github.com/budkee/coleta_armazenamento_ddd)
+### Documentação do Sistema
+
+- [Análise e Modelagem do Sistema | Notion](https://budkee.notion.site/Open-Weather-Map-3b2e4e5a58ec4898ad31f94c178ca2db?pvs=4)
+- [Componentes do Sistema | Notion](https://budkee.notion.site/Componentes-de-software-4c32db42b6584c9982c5c0b9314c788b?pvs=4)
 - [OpenWeatherMap | Docs](https://openweathermap.org/current)
+
+### Tutoriais
+
 - [Como conectar um script em Python a um banco de dados MySQL](https://youtu.be/FXlixv8Ieoc?si=5U9EPcKSe2ws1xOE)
 - [Criar tabela em um banco MySQL com script em Python](https://youtu.be/yMqBfSl53MA?si=g9KJWvnqnD11OQAz)
 - [Inserir dados em uma tabela MySQL com script em Python](https://youtu.be/HiK6OZjumew?si=--OkwhEDC8PEU1sv)
 - [Realizar consulta a banco de dados MySQL usando o Python](https://youtu.be/GheUY9b_-ww?si=DqYoz97Biu3HfZAL)
+
+### Imagens Docker
+
 - [Alpine | DockerHub](https://hub.docker.com/_/alpine)
 - [MySQL | DockerHub](https://hub.docker.com/_/mysql)
 - [PhpMyAdmin | DockerHub](https://hub.docker.com/_/phpmyadmin)
+
+### Outros
+
+- [Link desse repositório | GitHub](https://github.com/budkee/coleta_armazenamento_ddd)
+- [Próximas implementações | GitHub](backlog.md)

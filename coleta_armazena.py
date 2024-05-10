@@ -202,7 +202,7 @@ def main():
     parser.add_argument("--coord", nargs=2, metavar=('lat', 'long'), help="Latitude e longitude da estação meteorológica de interesse.")
     
     ## Nome do arquivo de saída
-    parser.add_argument("--out", metavar='arquivo_saida', help="Nome do arquivo de saída")
+    #parser.add_argument("--out", metavar='arquivo_saida', help="Nome do arquivo de saída")
     
     args = parser.parse_args()
     if args.coord and args.out:
