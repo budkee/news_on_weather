@@ -5,8 +5,6 @@
 | Transformar em classe (coleta_armazena)| [] |
 | Recolher dados por município | [] |
 | Recolher dados de modo periódico arbitrário | [] |
-| [Revisar o projeto](https://www.notion.so/budkee/Open-Weather-Map-3b2e4e5a58ec4898ad31f94c178ca2db?pvs=4#1cbd01e5aae14e28954fa3f3434ccf16) | [] |
-
 
 ## Links e Referências
 
