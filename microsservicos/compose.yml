@@ -1,0 +1,89 @@
+services:
+  
+  coleta_armazena:
+    container_name: coleta_armazena
+    build:
+      context: ./coleta_armazena
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"  # Porta do servidor Django exposta
+    networks:
+      - espaco
+    environment:
+      MYSQL_ROOT_PASSWORD: <your-rootpass>
+      MYSQL_HOST: db
+      MYSQL_DATABASE: db_coleta_armazena
+    volumes:
+      - ./coleta_armazena:/app/
+    tty: true
+
+  # analise:
+  #   build:
+  #     context: ./analise
+  #     dockerfile: Dockerfile
+  #   networks:
+  #     - espaco
+  #   environment:
+        # MYSQL_HOST: mysql_siriusa
+        # MYSQL_DATABASE: analise_db
+        # MYSQL_USER: notificacoes_user
+        # MYSQL_PASSWORD: notificacoes_pass
+  #   volumes:
+  #     - ./analise/data:/app/data
+
+  # notificacoes:
+  #   build:
+  #     context: ./notificacoes
+  #   networks:
+  #     - espaco
+  #   environment:
+        # MYSQL_HOST: mysql_siriusa
+  #     MYSQL_DATABASE: notificacoes_db
+  #   volumes:
+  #     - ./notificacoes/data:/app/notificacoes
+
+  # bib_meteorologica:
+  #   build:
+  #     context: ./bib_meteorologica
+  #   networks:
+  #     - espaco
+  #   environment:
+        # MYSQL_HOST: mysql_siriusa
+  #     MYSQL_DATABASE: bib_meteorologica_db
+  #   volumes:
+  #     - ./bib_meteorologica/data:/app/bib_meteorologica
+
+  db: 
+    image: mysql:latest
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: <your-rootpass>
+      MYSQL_DATABASE: db_coleta_armazena
+      MYSQL_USER: siriusb
+      MYSQL_PASSWORD: sirius
+    ports:
+      - 3307:3306
+    networks:
+      - espaco
+
+  pma_interface:
+    image: arm64v8/phpmyadmin
+    container_name: pma_interface
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      #PMA_ARBITRARY: 1
+      MYSQL_ROOT_PASSWORD: <your-rootpass>
+    networks:
+      - espaco
+
+networks:
+  espaco:
+    driver: bridge
+
+volumes:
+  mysql_data: 
+  

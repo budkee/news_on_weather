@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  
+  coleta_armazena:
+    build:
+      context: ./coleta_armazena
+    networks:
+      - espaco
+    environment:
+      MYSQL_DATABASE: coleta_armazena_db
+    volumes:
+      - ./coleta_armazena/data:/app/data
+
+  analise:
+    build:
+      context: ./analise
+    networks:
+      - espaco
+    environment:
+      MYSQL_DATABASE: analise_db
+    volumes:
+      - ./analise/data:/app/data
+
+  notificacoes:
+    build:
+      context: ./notificacoes
+    networks:
+      - espaco
+    environment:
+      MYSQL_DATABASE: notificacoes_db
+    volumes:
+      - ./notificacoes/data:/app/notificacoes
+
+  bib_meteorologica:
+    build:
+      context: ./bib_meteorologica
+    networks:
+      - espaco
+    environment:
+      MYSQL_DATABASE: bib_meteorologica_db
+    volumes:
+      - ./bib_meteorologica/data:/app/bib_meteorologica
+
+  mysql_siriusa:
+    image: mysql:latest
+    networks:
+      - espaco
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: siriusa
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  pma_interface:
+    image: phpmyadmin/phpmyadmin:latest
+    networks:
+      - espaco
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql_siriusa
+      MYSQL_ROOT_PASSWORD: example
+
+networks:
+  espaco:
+    driver: bridge
+
+volumes:
+  mysql_data: 
+  
