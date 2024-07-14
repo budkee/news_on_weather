@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Últimos Dados Climáticos</h1>
+    <table border="1" id="weather-data-table">
+        <thead>
+            <tr>
+                <th>Data/Hora</th>
+                <th>Localização</th>
+                <th>Descrição</th>
+                <th>Temp. Atual</th>
+                <th>Temp. Máx</th>
+                <th>Temp. Mín</th>
+                <th>Umidade</th>
+                <th>Velocidade do Vento</th>
+                <th>Direção do Vento</th>
+                <th>Rajada de Vento</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <canvas id="weather-chart" width="400" height="200"></canvas>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/weather/latest_data')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('weather-data-table').getElementsByTagName('tbody')[0];
+                    data.forEach(record => {
+                        const row = tableBody.insertRow();
+                        row.insertCell(0).innerText = new Date(record.data_hora).toLocaleString();
+                        row.insertCell(1).innerText = `${record.localizacao.nome} (${record.localizacao.latitude}, ${record.localizacao.longitude})`;
+                        row.insertCell(2).innerText = record.descricao_weather;
+                        row.insertCell(3).innerText = record.temperatura_atual;
+                        row.insertCell(4).innerText = record.temperatura_max;
+                        row.insertCell(5).innerText = record.temperatura_min;
+                        row.insertCell(6).innerText = record.umidade;
+                        row.insertCell(7).innerText = record.velocidade_vento;
+                        row.insertCell(8).innerText = record.direcao_vento;
+                        row.insertCell(9).innerText = record.rajada_vento;
+                    });
+
+                    const ctx = document.getElementById('weather-chart').getContext('2d');
+                    const labels = data.map(record => new Date(record.data_hora).toLocaleString());
+                    const temperatures = data.map(record => record.temperatura_atual);
+                    const humidity = data.map(record => record.umidade);
+                    const windSpeed = data.map(record => record.velocidade_vento);
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Temperatura Atual',
+                                    data: temperatures,
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1,
+                                    fill: false
+                                },
+                                {
+                                    label: 'Umidade',
+                                    data: humidity,
+                                    borderColor: 'rgba(153, 102, 255, 1)',
+                                    borderWidth: 1,
+                                    fill: false
+                                },
+                                {
+                                    label: 'Velocidade do Vento',
+                                    data: windSpeed,
+                                    borderColor: 'rgba(255, 159, 64, 1)',
+                                    borderWidth: 1,
+                                    fill: false
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Data/Hora'
+                                    }
+                                },
+                                y: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Valores'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+        });
+    </script>
+</body>
+</html>

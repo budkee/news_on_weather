@@ -1,0 +1,101 @@
+services:
+  # --------------------- Flask Framework Server ------------------
+  weather:
+    container_name: 'weather_api'
+    build:
+      context: ./flask/app/weather
+      dockerfile: Dockerfile
+      # image: weather_api
+    env_file:
+      - .env
+    networks:
+      - espaco
+    ports:
+      - "5002:5002"       
+    volumes:
+      - ./flask/app/weather:/app
+    depends_on:
+      postgresql:
+        condition: service_healthy
+  
+  newsletter:
+    container_name: 'newsletter_api'
+    build:
+      context: ./flask/app/newsletter
+      dockerfile: Dockerfile
+      # image: newsletter_api
+    env_file:
+      - .env
+    networks:
+      - espaco
+    ports:
+      - "5003:5003"      
+    volumes:
+      - ./flask/app/newsletter:/app
+    depends_on:
+      postgresql:
+        condition: service_healthy
+
+
+  # --------------------- Database Server e GUI ------------------
+  postgresql:
+    container_name: 'db'
+    image: postgres:latest
+    restart: always
+    ports:
+      - "7777:5432" # Pgadmin
+      - "8887:5432" # Weather Service
+      - "8877:5432" # Newsletter Service
+    expose:
+      - "5432"
+    networks:
+      - espaco
+    env_file:
+      - .env
+    volumes:
+      - ./db/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: 'gui_db'
+    image: dpage/pgadmin4:8.9
+    networks:
+      - espaco
+    ports:
+      - "7778:80"
+    env_file:
+      - .env
+
+  # --------------------- API Gateway ------------------
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d       
+    ports:
+      - "6767:80"
+    expose:
+      - "80"
+    depends_on:
+      - weather
+      - newsletter
+    networks:
+      - espaco
+
+# --------------------- Rede ------------------
+networks:
+  espaco:
+    driver: bridge      ## Cria uma ponte entre a sua rede local e a do container(espaco).
+
+# --------------------- Volumes ------------------
+volumes:
+  api_server:
+  nginx:
+
+# --------------------- Referências ------------------
+# Server Setup (Django, WSGI, Gunicorn, Ngnix): https://youtu.be/YnrgBeIRtvo?si=BLf4TUsolGorddR9
+# Servindo arquivos estáticos no Django: https://www.youtube.com/watch?v=zYmkrWUWxEI

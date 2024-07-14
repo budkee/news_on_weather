@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather API</title>
+</head>
+
+<body>
+    <h1>Boletim Meteorológico</h1>
+    <p>Se inscreva para receber notícias do tempo atual. O boletim será entregue a partir da data de cadastro na
+        plataforma.
+    </p>
+    <!-- <p>Se inscreva para receber notícias da previsão do tempo para 5 dias.</p> -->
+    <h2>Registro de Usuário</h2>
+    <form action="/register" method="post">
+        <label for="email">Endereço de Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="frequency">Escolha a Frequência de Notificação:</label>
+        <select id="frequency" name="frequency">
+            <option value="minute">Minuto</option>
+            <option value="daily">Diária</option>
+            <option value="weekly">Semanal</option>
+            <option value="biweekly">Quinzenal</option>
+            <option value="monthly">Mensal</option>
+            <option value="semiannual">Semestral</option>
+        </select><br><br>
+
+        <input type="submit" value="Registrar">
+
+    <h2>Descadastro de Usuário</h2>
+    <form action="/unsubscribe" method="post">
+        <label for="email">Endereço de Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <input type="submit" value="Descadastrar">
+    </form>
+</body>
+
+</html>
+</form>
+</body>
+
+</html>
+</body>
+
+</html>

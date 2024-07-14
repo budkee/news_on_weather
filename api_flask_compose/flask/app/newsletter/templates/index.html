@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boletim Meteorológico</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #007bff;
+        }
+
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            margin: 10px 0;
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        form {
+            margin: 20px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="email"], select {
+            width: 200px; /* Define a largura dos inputs */
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px; /* Define o tamanho da fonte */
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px; /* Define o tamanho da fonte */
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Boletim Meteorológico</h1>
+        <p>Inscreva-se para receber notícias do tempo atual.</p>
+        <p>O boletim será entregue a partir da data de cadastro na plataforma.</p>
+
+        <h2>Registro de Usuário</h2>
+        <form id="registerForm">
+            <label for="registerEmail">Endereço de Email:</label>
+            <input type="email" id="registerEmail" name="email" required><br><br>
+
+            <label for="frequency">Escolha a Frequência de Notificação:</label>
+            <select id="frequency" name="frequency">
+                <option value="minute">Minuto(Teste)</option>
+                <option value="weekly">Semanal</option>
+                <option value="biweekly">Quinzenal</option>
+                <option value="monthly">Mensal</option>
+                <option value="semiannual">Semestral</option>
+            </select><br><br>
+
+            <input type="submit" value="Registrar">
+        </form>
+
+        <h2>Descadastro de Usuário</h2>
+        <form id="unsubscribeForm">
+            <label for="unsubscribeEmail">Endereço de Email:</label>
+            <input type="email" id="unsubscribeEmail" name="email" required><br><br>
+
+            <input type="submit" value="Descadastrar">
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var email = document.getElementById('registerEmail').value;
+            var frequency = document.getElementById('frequency').value;
+
+            fetch('/newsletter/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    frequency: frequency
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('unsubscribeForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var email = document.getElementById('unsubscribeEmail').value;
+
+            fetch('/newsletter/unsubscribe?email=' + encodeURIComponent(email), {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message || data.error);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+
+</html>
