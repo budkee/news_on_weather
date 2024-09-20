@@ -3,7 +3,7 @@ import smtplib
 import requests
 from email.mime.text import MIMEText
 from datetime import datetime, timedelta
-from weather_repository import WeatherRepository
+from data_repository import WeatherRepository
 
 # ---------------- Servico de coleta de dados climaticos ----------------
 class OpenWeatherMapClient:

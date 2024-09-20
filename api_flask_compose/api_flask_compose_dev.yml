@@ -8,8 +8,6 @@ services:
       # image: weather_api
     env_file:
       - .env
-    networks:
-      - espaco
     ports:
       - "5002:5002"       
     volumes:
@@ -26,8 +24,6 @@ services:
       # image: newsletter_api
     env_file:
       - .env
-    networks:
-      - espaco
     ports:
       - "5003:5003"      
     volumes:
@@ -48,8 +44,6 @@ services:
       - "8877:5432" # Newsletter Service
     expose:
       - "5432"
-    networks:
-      - espaco
     env_file:
       - .env
     volumes:
@@ -63,39 +57,7 @@ services:
   pgadmin:
     container_name: 'gui_db'
     image: dpage/pgadmin4:8.11
-    networks:
-      - espaco
     ports:
       - "7778:80"
     env_file:
       - .env
-
-  # --------------------- API Gateway ------------------
-  nginx:
-    container_name: nginx
-    build: ./nginx
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d       
-    ports:
-      - "6767:80"
-    expose:
-      - "80"
-    depends_on:
-      - weather
-      - newsletter
-    networks:
-      - espaco
-
-# --------------------- Rede ------------------
-networks:
-  espaco:
-    driver: bridge      ## Cria uma ponte entre a sua rede local e a do container(espaco).
-
-# --------------------- Volumes ------------------
-volumes:
-  api_server:
-  nginx:
-
-# --------------------- Referências ------------------
-# Server Setup (Django, WSGI, Gunicorn, Ngnix): https://youtu.be/YnrgBeIRtvo?si=BLf4TUsolGorddR9
-# Servindo arquivos estáticos no Django: https://www.youtube.com/watch?v=zYmkrWUWxEI

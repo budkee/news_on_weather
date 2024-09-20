@@ -24,29 +24,44 @@ MAIL_PASSWORD = app.config['MAIL_PASSWORD']
 mail = Mail(app)
 user_service = UserService(mail)
 
-api = Api(app, version='1.4', title='Notification Service API',
-          description='A simple Notification Service API')
+api = Api(
+        app, 
+        version='1.5', 
+        title='Notification Service API',
+        description='Serviço de entrega de informativos climáticos.',
+    )
 
-ns = api.namespace('newsletter', description='Serviço de entrega de informativos climáticos.')
+ns = api.namespace(
+        'newsletter', 
+        description='Serviço de entrega de informativos climáticos.')
 
-# ---------------- Modelagem dos dados para o Swagger ----------------
+# ---------------- Modelagem dos dados | Swagger ----------------
 
-user_model = api.model('User', {
-    'email': fields.String(required=True, description='The user email'),
-    'frequency': fields.String(required=True, description='Notification frequency', enum=['minute', 'daily', 'weekly', 'biweekly', 'monthly', 'semiannual'])
+user_model = api.model('User', 
+{
+    'email': fields.String(
+        required=True, 
+        description='The user email'
+    ),
+    'frequency': fields.String(
+        required=True,
+        description='Notification frequency', 
+        enum=['minute', 'daily', 'weekly', 'biweekly', 'monthly', 'semiannual']
+    )
 })
 
 # ------------ Endpoints ------------
 """
     Serviço de Cadastro e Descadastro de Usuários
 """ 
-
 @app.route('/home')
 def index():
     return send_from_directory(directory='templates', path='index.html')
 
-# Registro de usuário
-@ns.route('/register')
+'''
+    Registro de usuário
+'''
+@ns.route('/registrar')
 class Register(Resource):
 
     @ns.expect(user_model)
@@ -64,8 +79,10 @@ class Register(Resource):
         user = user_service.register_user(email, frequency)
         return {"message": "Usuário registrado com sucesso!", "user": user.email}, 201
 
-# Descadastro de usuário
-@ns.route('/unsubscribe')
+'''
+    Descadastro de usuário
+'''
+@ns.route('/descadastrar')
 class Unsubscribe(Resource):
     
     @ns.param('email', 'The user email')
@@ -85,7 +102,7 @@ class Unsubscribe(Resource):
 """
     Serviço de Envio de emails aos usuários
 """ 
-@ns.route('/send_email')
+@ns.route('/enviar_email')
 class SendEmail(Resource):
     
     @ns.response(200, 'Emails enviados com sucesso!')
@@ -95,6 +112,7 @@ class SendEmail(Resource):
         try:
             # ---------- Log do tempo de execução ----------
             # TODO: imprima a execução dos últimos 5 envios.
+            
             # ---------- Agendamento dos Emails ----------
             app.logger.info("Iniciando o envio de emails...")
             

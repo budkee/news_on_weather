@@ -1,4 +1,4 @@
-from models_data import Localizacao, CondicoesClimaticas
+from data_models import Localizacao, CondicoesClimaticas
 from db_conn import Session
 from sqlalchemy import desc
 

@@ -2,17 +2,21 @@ import os
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-
 from flask import Flask, request, jsonify, make_response, send_from_directory, render_template
 from flask_restx import Api, Resource, fields
-from weather_service import OpenWeatherMapClient, parse_weather_data
-from weather_repository import WeatherRepository
+from data_service import OpenWeatherMapClient, parse_weather_data
+from data_repository import WeatherRepository
 
 # ---------------- Data App + Swagger Doc ----------------
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
-api = Api(app, version='1.4', title='Serviço de Coleta de Dados',
-          description='Serviço de coleta de dados meteorológicos.')
+api = Api(
+        app, 
+        version='1.4', 
+        title='Serviço de Coleta de Dados', 
+        description='Serviço de coleta de dados meteorológicos.'
+    )
+
 ns = api.namespace('weather', description='Serviço de coleta de dados meteorológicos.')
 
 
@@ -20,8 +24,7 @@ ns = api.namespace('weather', description='Serviço de coleta de dados meteorol�
 
 location_model = api.model('Location', {
     'latitude': fields.Float(required=True, description='The latitude'),
-    'longitude': fields.Float(required=True, description='The longitude'),
-    'nome': fields.String(description='The name of the location')
+    'longitude': fields.Float(required=True, description='The longitude')
 })
 
 weather_data_model = api.model('WeatherData', {
@@ -53,7 +56,7 @@ pagination_model = api.model('Pagination', {
 """
     Serviço de coleta de dados periódicos
 
-    - Coleta de dados agendada para ser feita uma vez por dia.
+    - Coleta de dados agendada para ser feita 59 vezes a cada minuto.
 """
 def collect_weather_data():
     with app.app_context():
@@ -84,10 +87,9 @@ def index():
 
 """
     Fixamos a lat e longitude da ufms, ta salvando no banco de dados certinho.
-
+    - [POST] rota: /weather/coletar | Respostas {'201': sucesso, '400': falha}
 """
-# [POST] rota: /weather/collect | Respostas {'201': sucesso, '400': falha}
-@ns.route('/collect', methods = ['POST'])
+@ns.route('/coletar', methods = ['POST'])
 class CollectWeatherData(Resource):
     
     @ns.expect(location_model)
@@ -102,7 +104,7 @@ class CollectWeatherData(Resource):
 
 
 # [GET] rota: /weather/data | Limite de 10 registros por página
-@ns.route('/data', methods = ['GET'])
+@ns.route('/dados', methods = ['GET'])
 class ListWeatherData(Resource):
     
     @ns.expect(pagination_model)
@@ -190,5 +192,5 @@ class LatestWeatherData(Resource):
 # ---------------- Início da Aplicação ----------------
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5002, debug=True)
+    app.run(port=5002, debug=True)
 

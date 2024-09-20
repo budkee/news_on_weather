@@ -5,96 +5,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boletim Meteorológico</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #007bff;
-        }
-
-        .container {
-            text-align: center;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1, h2 {
-            margin: 10px 0;
-        }
-
-        p {
-            margin-bottom: 20px;
-        }
-
-        form {
-            margin: 20px 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input[type="email"], select {
-            width: 200px; /* Define a largura dos inputs */
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px; /* Define o tamanho da fonte */
-        }
-
-        input[type="submit"] {
-            padding: 10px 20px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px; /* Define o tamanho da fonte */
-        }
-
-        input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <div class="container">
-        <h1>Boletim Meteorológico</h1>
-        <p>Inscreva-se para receber notícias do tempo atual.</p>
-        <p>O boletim será entregue a partir da data de cadastro na plataforma.</p>
+<body class="flex items-center justify-center h-screen bg-blue-500">
+    <div class="text-center bg-white bg-opacity-80 p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold mb-2">Boletim Meteorológico</h1>
+        <p class="mb-2">Inscreva-se para receber notícias do tempo atual.</p>
+        <p class="mb-6">O boletim será entregue a partir da data de cadastro na plataforma.</p>
 
-        <h2>Registro de Usuário</h2>
-        <form id="registerForm">
-            <label for="registerEmail">Endereço de Email:</label>
-            <input type="email" id="registerEmail" name="email" required><br><br>
-
-            <label for="frequency">Escolha a Frequência de Notificação:</label>
-            <select id="frequency" name="frequency">
-                <option value="minute">Minuto(Teste)</option>
+        <h2 class="text-xl font-semibold mb-4">Registro de Usuário</h2>
+        <form id="registerForm" class="mb-6">
+            <label for="registerEmail" class="block text-left mb-2">Endereço de Email:</label>
+            <input type="email" id="registerEmail" name="email" required class="w-48 p-2 mb-4 border border-gray-300 rounded-md text-lg">
+            
+            <label for="frequency" class="block text-left mb-2">Escolha a Frequência de Notificação:</label>
+            <select id="frequency" name="frequency" class="w-48 p-2 mb-4 border border-gray-300 rounded-md text-lg">
+                <option value="minute">Minuto (Teste)</option>
                 <option value="weekly">Semanal</option>
                 <option value="biweekly">Quinzenal</option>
                 <option value="monthly">Mensal</option>
                 <option value="semiannual">Semestral</option>
-            </select><br><br>
+            </select>
 
-            <input type="submit" value="Registrar">
+            <input type="submit" value="Registrar" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer text-lg">
         </form>
 
-        <h2>Descadastro de Usuário</h2>
+        <h2 class="text-xl font-semibold mb-4">Descadastro de Usuário</h2>
         <form id="unsubscribeForm">
-            <label for="unsubscribeEmail">Endereço de Email:</label>
-            <input type="email" id="unsubscribeEmail" name="email" required><br><br>
-
-            <input type="submit" value="Descadastrar">
+            <label for="unsubscribeEmail" class="block text-left mb-2">Endereço de Email:</label>
+            <input type="email" id="unsubscribeEmail" name="email" required class="w-48 p-2 mb-4 border border-gray-300 rounded-md text-lg">
+            
+            <input type="submit" value="Descadastrar" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer text-lg">
         </form>
     </div>
 
@@ -104,7 +46,7 @@
             var email = document.getElementById('registerEmail').value;
             var frequency = document.getElementById('frequency').value;
 
-            fetch('/newsletter/register', {
+            fetch('/newsletter/registrar', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -127,7 +69,7 @@
             event.preventDefault();
             var email = document.getElementById('unsubscribeEmail').value;
 
-            fetch('/newsletter/unsubscribe?email=' + encodeURIComponent(email), {
+            fetch('/newsletter/descadastrar?email=' + encodeURIComponent(email), {
                 method: 'DELETE'
             })
             .then(response => response.json())
