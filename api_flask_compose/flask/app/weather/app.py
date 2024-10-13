@@ -1,13 +1,14 @@
 import os
 from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 from flask import Flask, request, jsonify, make_response, send_from_directory, render_template
 from flask_restx import Api, Resource, fields
 from data_service import OpenWeatherMapClient, parse_weather_data
 from data_repository import WeatherRepository
 
-# ---------------- Data App + Swagger Doc ----------------
+# ---------------- App + Swagger Doc ----------------
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 api = Api(
@@ -53,31 +54,9 @@ pagination_model = api.model('Pagination', {
     'page': fields.Integer(description='Page number')
     
 })
-"""
-    Serviço de coleta de dados periódicos
 
-    - Coleta de dados agendada para ser feita 59 vezes a cada minuto.
-"""
-def collect_weather_data():
-    with app.app_context():
-        
-        latitude = 37.09024
-        longitude = -95.712891
-        nome = 'UFMS'
-
-        owm_client = OpenWeatherMapClient(os.getenv('API_KEY'))
-        weather_data = owm_client.get_weather_data(latitude, longitude)
-        parsed_data = parse_weather_data(weather_data)
-
-        repo = WeatherRepository()
-        localizacao = {"latitude": latitude, "longitude": longitude, "nome": nome}
-        saved_localizacao = repo.save_localizacao(localizacao)
-        repo.save_condicoes_climaticas(saved_localizacao.id, parsed_data)
-
-
+# ---------------- Scheduler ----------------
 scheduler = BackgroundScheduler()
-# scheduler.add_job(collect_weather_data, trigger='interval', seconds=5) # Coleta rápida
-scheduler.add_job(collect_weather_data, CronTrigger(hour=0, minute=1))
 scheduler.start()
 
 # ---------------- Rotas/Endpoints ----------------
@@ -86,22 +65,52 @@ def index():
     return render_template('index.html')
 
 """
-    Fixamos a lat e longitude da ufms, ta salvando no banco de dados certinho.
-    - [POST] rota: /weather/coletar | Respostas {'201': sucesso, '400': falha}
+    Serviço de coleta de dados periódicos com inserção dinâmica de coordenadas pelo usuário
 """
-@ns.route('/coletar', methods = ['POST'])
+
+
+def collect_weather_data(latitude, longitude):
+    with app.app_context():
+        # ---------------- Coleta de dados climáticos ----------------
+        owm_client = OpenWeatherMapClient(os.getenv('API_KEY'))
+        weather_data = owm_client.get_weather_data(latitude, longitude)
+        parsed_data = parse_weather_data(weather_data)
+        # ---------------- Salvando dados climáticos ----------------
+        repo = WeatherRepository()
+        localizacao = {"latitude": latitude, "longitude": longitude}
+        saved_localizacao = repo.save_localizacao(localizacao)
+        repo.save_condicoes_climaticas(saved_localizacao.id, parsed_data)
+
+"""
+    Rota POST: Permite que o usuário insira latitude e longitude e agende coletas de dados
+    - [POST] /weather/coletar
+"""
+@ns.route('/coletar', methods=['POST'])
 class CollectWeatherData(Resource):
-    
+
     @ns.expect(location_model)
     @ns.response(201, 'Dados climáticos atuais coletados com sucesso!')
     @ns.response(400, 'Invalid input')
     def post(self):
-        # ----------- Execução do Serviço ----------- 
-        
-        collect_weather_data()
-        # Response enviada no email #01
-        return {"message": "Dados climáticos atuais coletados com sucesso!"}, 201
+        try:
+            data = request.json
+            latitude = data.get('latitude')
+            longitude = data.get('longitude')
 
+            if not latitude or not longitude:
+                return {"message": "Latitude e longitude são obrigatórias."}, 400
+
+            # Agendamento para coletar 59 vezes por minuto com as coordenadas fornecidas
+            scheduler.add_job(
+                lambda: collect_weather_data(latitude, longitude),
+                trigger=IntervalTrigger(minutes=1),  # Coleta a cada 1 minuto
+                max_instances=59  # Limita a 59 instâncias por hora
+            )
+
+            return {"message": "Coleta de dados climáticos agendada com sucesso!"}, 201
+        
+        except Exception as e:
+            return {"message": f"Erro ao agendar coleta de dados climáticos: {str(e)}"}, 400
 
 # [GET] rota: /weather/data | Limite de 10 registros por página
 @ns.route('/dados', methods = ['GET'])

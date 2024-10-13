@@ -32,7 +32,6 @@ class EmailLog(Base):
     user = relationship("User", back_populates="email_logs")
 # ---------------- Insersão no PostgreSQL ----------------
 
-
 # Acquire an advisory lock (arbitrary number as lock identifier, e.g., 12345)
 with engine_newsletter.connect() as connection:
     connection.execute(text("SELECT pg_advisory_lock(12345)"))

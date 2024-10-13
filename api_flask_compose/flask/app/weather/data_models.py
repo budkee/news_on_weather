@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, text, inspect
 from sqlalchemy.orm import relationship
 from db_conn import Base, engine_weather
 
@@ -33,4 +33,16 @@ class CondicoesClimaticas(Base):
     localizacao = relationship('Localizacao', back_populates='condicoes_climaticas')
 
 # Criar as tabelas no banco de dados
-Base.metadata.create_all(engine_weather)
+# Acquire an advisory lock (arbitrary number as lock identifier, e.g., 12345)
+with engine_weather.connect() as connection:
+    connection.execute(text("SELECT pg_advisory_lock(12345)"))
+    
+    try:
+        # Check and create the table within the lock
+        inspector = inspect(engine_weather)
+
+        if not inspector.has_table('localizacao') or not inspector.has_table('condicoes_climaticas'):
+            Base.metadata.create_all(bind=engine_weather)
+    finally:
+        # Release the advisory lock
+        connection.execute(text("SELECT pg_advisory_unlock(12345)"))
